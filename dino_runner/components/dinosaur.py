@@ -5,7 +5,7 @@ from dino_runner.utils.constants import JUMPING, RUNNING, DUCKING
 class Dinosaur(Sprite):
     X_POS = 80
     Y_POS = 310
-    JUMP_VEL = 8
+    JUMP_VEL = 9
 
     def __init__(self):
         self.image = RUNNING[0]
