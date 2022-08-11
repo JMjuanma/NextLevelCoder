@@ -1,8 +1,10 @@
 import pygame
 from dino_runner.components.dinosaur import Dinosaur
-from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS
+from dino_runner.utils.constants import BG, ICON, RUNNING, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS
 
 from .obstacles.manager import Manager
+
+FONT_STYLE="freesansbold.ttf"
 class Game:
     def __init__(self):
         pygame.init()
@@ -12,29 +14,49 @@ class Game:
         self.clock = pygame.time.Clock()
         self.player = Dinosaur()
         self.obstacle_manager = Manager()
+        self.running = False
         self.playing = False
         self.game_speed = 20
         self.x_pos_bg = 0
         self.y_pos_bg = 380
+        self.death_count = 0
+        self.points = 0
+        self.points_record = 0
 
     def run(self):
         # Game loop: events - update - draw
+        self.obstacle_manager.reset_obstacles()
         self.playing = True
         while self.playing:
             self.events()
             self.update()
             self.draw()
-        pygame.quit()
 
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.playing = False
+                self.running = False
+
+    def handle_events_on_menu(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.playing = False
+                self.running = False
+            if event.type == pygame.KEYDOWN :
+                self.points = 0
+                self.run()
 
     def update(self):
+        self.update_score()
         user_input = pygame.key.get_pressed()
         self.player.update(user_input)
         self.obstacle_manager.update(self)
+    
+    def update_score(self):
+        self.points += 1
+        if self.points % 100 == 0:
+            self.game_speed +=1
 
     def draw(self):
         self.clock.tick(FPS)
@@ -42,6 +64,7 @@ class Game:
         self.draw_background()
         self.player.draw(self.screen)
         self.obstacle_manager.draw(self.screen)
+        self.draw_score()
         pygame.display.update()
         pygame.display.flip()
 
@@ -53,3 +76,42 @@ class Game:
             self.screen.blit(BG, (image_width + self.x_pos_bg, self.y_pos_bg))
             self.x_pos_bg = 0
         self.x_pos_bg -= self.game_speed
+
+    def execute(self):
+        self.running = True
+        while self.running:
+            if not self.playing:
+                self.points_record = max(self.points, self.points_record)
+                self.game_speed = 20
+                self.show_menu()
+
+        pygame.display.quit()
+        pygame.quit() 
+        
+    def draw_score(self):
+        self.show_message(f"Points {self.points}", 22, 1000, 50)
+
+    def show_menu(self):
+        self.screen.fill((200, 200, 250))
+        half_screen_height = SCREEN_HEIGHT // 2
+        half_screen_width = SCREEN_WIDTH // 2
+
+        if self.death_count:
+            #mostrar numero de muertes y puntos, mensaje de reinicio
+            self.show_message("You died", 60, half_screen_width, 50)
+            self.show_message(f"Death number {self.death_count}", 20, half_screen_width, 130)
+            self.show_message("Press any key to start again", 30, half_screen_width, half_screen_height)
+            self.show_message(f"Final points : {self.points}", 30, half_screen_width, half_screen_height+50)
+            self.show_message(f"Your points record: {self.points_record}", 20, half_screen_width, half_screen_height+100)
+        else:
+            self.show_message("Press any key to start", 30, half_screen_width, half_screen_height)
+        self.screen.blit(RUNNING[0], (half_screen_width-20, half_screen_height-140))
+        pygame.display.update()
+        self.handle_events_on_menu()
+
+    def show_message(self, message, characters_size, rect_x, rect_y):
+        font = pygame.font.Font(FONT_STYLE, characters_size)
+        text = font.render(message, True, (0, 0, 0))
+        text_rect = text.get_rect()
+        text_rect.center = (rect_x, rect_y)
+        self.screen.blit(text, text_rect)

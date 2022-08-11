@@ -27,6 +27,7 @@ class Manager:
             if game.player.dino_rect.colliderect(obstacle.rect):
                 pygame.time.delay(500)
                 game.playing = False
+                game.death_count += 1
                 break
             if obstacle.family == "bird" and self.bird_stage<5:
                 obstacle.type=0
@@ -45,3 +46,6 @@ class Manager:
                     obstacle.draw(screen, 0)
             elif obstacle.family == "bird":
                 obstacle.draw(screen, obstacle.height)
+
+    def reset_obstacles(self):
+        self.obstacles=[]
