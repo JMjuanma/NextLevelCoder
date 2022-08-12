@@ -2,7 +2,7 @@ from random import choice
 import pygame
 from dino_runner.components.obstacles.cactus import Cactus
 from dino_runner.components.obstacles.bird import Bird
-from dino_runner.utils.constants import SMALL_CACTUS, LARGE_CACTUS, BIRD
+from dino_runner.utils.constants import SHIELD_TYPE, SMALL_CACTUS, LARGE_CACTUS, BIRD
 
 class Manager:
     def __init__(self):
@@ -23,11 +23,15 @@ class Manager:
                 self.obstacles.append(Cactus(self.family, "small"))
 
         for obstacle in self.obstacles:
-            obstacle.update(game.game_speed, self.obstacles)
+            game.update_time()
+            obstacle.update(game.game_speed_on_use, self.obstacles)
             if game.player.dino_rect.colliderect(obstacle.rect):
-                pygame.time.delay(500)
-                game.playing = False
-                game.death_count += 1
+                if not game.player.type == SHIELD_TYPE:
+                    pygame.time.delay(500)
+                    game.playing = False
+                    game.death_count += 1
+                else:
+                    self.obstacles.remove(obstacle)
                 break
             if obstacle.family == "bird" and self.bird_stage<5:
                 obstacle.type=0
@@ -36,7 +40,6 @@ class Manager:
                 obstacle.type=1
                 self.bird_stage = (self.bird_stage+1)%10
         
-
     def draw(self, screen):
         for obstacle in self.obstacles:
             if obstacle.family == "cactus":
