@@ -24,7 +24,7 @@ class Manager:
 
         for obstacle in self.obstacles:
             game.update_time()
-            obstacle.update(game.game_speed_on_use, self.obstacles)
+            obstacle.update(game.game_speed_in_use, self.obstacles)
             if game.player.dino_rect.colliderect(obstacle.rect):
                 if not game.player.type == SHIELD_TYPE:
                     pygame.time.delay(500)
