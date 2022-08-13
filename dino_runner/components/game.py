@@ -45,16 +45,12 @@ class Game:
 
     def handle_events_on_menu(self):
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if ( (event.type == pygame.KEYDOWN) and (pygame.key.get_pressed()[pygame.K_DOWN]) ) or (event.type == pygame.QUIT) :
                 self.playing = False
                 self.running = False
-            if event.type == pygame.KEYDOWN :
-                if pygame.key.get_pressed()[pygame.K_DOWN]:
-                    pygame.quit()
-                    sys.exit()
-                else:
-                    self.points = 0
-                    self.run()
+            elif event.type == pygame.KEYDOWN:
+                self.points = 0
+                self.run()
 
     def update(self):
         self.update_score()
